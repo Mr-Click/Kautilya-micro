@@ -1,9 +1,8 @@
 ##Kautilya
 
-###Kautilya is a toolkit which provides various payloads for a Human Interface Device which may help in breaking in a computer during penetration tests. 
-By [nikhil_mitt](https://twitter.com/nikhil_mitt)
-
-#####List of Payloads
+###Kautilya-micro is a porting of Kautilya toolkit to Arduino-Micro platform.
+Kautilya is developed by [nikhil_mitt](https://twitter.com/nikhil_mitt) and its original repository can be fount [here](https://github.com/samratashok/Kautilya)
+#####List of Supported Payloads
 #####Windows
 ######Gather
 - Gather Information
