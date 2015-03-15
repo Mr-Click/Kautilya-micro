@@ -1,4 +1,4 @@
-##Kautilya
+##Kautilya-micro
 
 ###Kautilya-micro is a porting from Kautilya toolkit to Arduino-Micro platform.
 Kautilya is developed by [nikhil_mitt](https://twitter.com/nikhil_mitt) and its original repository can be found [here](https://github.com/samratashok/Kautilya)
