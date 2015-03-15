@@ -37,10 +37,14 @@ print"http://code.google.com/p/kautilya/           ".cyan
 print"|..|\n".green
 print"|..| ".green
 print"Blog: ".yellow
-print"http://labofapenetrationtester.com/ ".cyan
+print"http://labofapenetrationtester.com/		".cyan
+print"|..|\n".green
+print"|..| ".green
+print"Arduino porting: ".yellow 
+print"@Mr_Click				".cyan
 print"|..|\n".green
 puts"\nKautilya is a toolkit to ease usage of Human Interface Devices in Pen Tests."
-puts"Tested on Teensy++ and Teensy 3.0 from pjrc.com."
+puts"Tested on Teensy++, Teensy 3.0 from pjrc.com and Arduino Micro/Leonardo"
 
 while(true)
 
