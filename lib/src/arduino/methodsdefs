@@ -1,0 +1,106 @@
+void wait_for_drivers(int sleep)
+{
+  bool CapsLockTrap = Keyboard.isCapsLockOn();
+  while(CapsLockTrap == Keyboard.isCapsLockOn())
+  {
+    Keyboard.press(KEY_CAPS_LOCK);
+    delay(200);
+    Keyboard.release(KEY_CAPS_LOCK);
+    delay(500);
+    delay(sleep);
+  }
+  Keyboard.press(KEY_CAPS_LOCK);
+  delay(200);
+  Keyboard.release(KEY_CAPS_LOCK);
+  delay(500);
+  delay(sleep);
+}
+
+bool is_caps_on(void) {return Keyboard.isCapsLockOn();}
+
+bool cmd_admin(int reps, int millisecs)
+{
+  make_sure_capslock_is_off();
+  delay(700);
+  Keyboard.press(KEY_LEFT_GUI);
+  Keyboard.press('r');
+  delay(100);
+  Keyboard.releaseAll();
+  delay(500);
+  Keyboard.println("cmd /T:01 /K \"@echo off && mode con:COLS=15 LINES=1 && title Installing Drivers\"");
+  delay(2000);
+  create_click_capslock_win();
+  return check_for_capslock_success(reps,millisecs);
+}
+
+bool cmd(int reps, int millisecs, char *SomeCommand)
+{
+  make_sure_capslock_is_off();
+  delay(700);
+  Keyboard.press(KEY_LEFT_GUI);
+  Keyboard.press('r');
+  delay(100);
+  Keyboard.releaseAll();
+  
+  Keyboard.println(SomeCommand);
+  delay(3000);
+  create_click_capslock_win();
+  check_for_capslock_success(reps,millisecs);
+}
+
+void make_sure_capslock_is_off(void)
+{
+  bool CapsLockTrap = Keyboard.isCapsLockOn();
+  if(CapsLockTrap)
+  {
+    //we press the CAPLOCK button via its keycode
+    Keyboard.press(KEY_CAPS_LOCK);
+    delay(200);
+    Keyboard.release(KEY_CAPS_LOCK);
+  }
+}
+
+void create_click_capslock_win()
+{
+  Keyboard.println("echo Set WshShell = WScript.CreateObject(\"WScript.Shell\"): WshShell.SendKeys \"{CAPSLOCK}\" > %temp%\\\\capslock.vbs");
+  delay(400);
+  Keyboard.println("wscript %temp%\\\\capslock.vbs");
+  delay(2000);
+}
+
+bool check_for_capslock_success(int reps, int millisecs)
+{
+unsigned int i = 0;
+do
+{
+  delay(millisecs);
+  if (Keyboard.isCapsLockOn())
+  {
+  make_sure_capslock_is_off();
+  delay(700);
+  return true;
+  }
+  i++;
+}
+while (!is_caps_on() && (i<reps));
+return false;
+}
+
+void minimise_windows(void)
+{
+  Keyboard.press(KEY_LEFT_GUI);
+  Keyboard.press('m');
+  delay(100);
+  Keyboard.releaseAll();
+}
+
+void reset_windows_desktop(int sleep)
+{
+delay(1000);
+minimise_windows();
+delay(sleep);
+minimise_windows();
+delay(sleep);
+minimise_windows();
+delay(200);
+}
